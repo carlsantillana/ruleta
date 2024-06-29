@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Optimization System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="split">
+            <div class="left">
+                <h1>Sistema de Optimización de Ruleta</h1>
+                
+                <form method="POST" action="{{ url_for('index') }}">
+                    <input type="text" name="number" placeholder="Enter number" id="number-input">
+                    <button type="submit">Add Number</button>
+                </form>
+                
+                <h2>Numbers so far: {{ numbers }}</h2>
+                <h2>Recommended bets:</h2>
+                <ul>
+                    {% if recommendations[0] == "Model not trained yet" or recommendations[0] == "Not enough data to make recommendations" %}
+                        <li>{{ recommendations[0] }}</li>
+                    {% else %}
+                        {% for number in recommendations %}
+                            <li>{{ number }}</li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+
+                <h2>Recommended color: {{ color_recommendation }}</h2>
+                <h2>Recommended parity: {{ parity_recommendation }}</h2>
+                <h2>Recommended range:</h2>
+                <ul>
+                    {% if range_recommendation == "Not enough data to recommend range" %}
+                        <li>{{ range_recommendation }}</li>
+                    {% else %}
+                        {% for range in range_recommendation %}
+                            <li>{{ range }}</li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+
+                <form method="POST" action="{{ url_for('train') }}">
+                    <button type="submit">Train Model</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('reset') }}">
+                    <button type="submit">Reset Model</button>
+                </form>
+
+                <img src="data:image/png;base64,{{ plot_url }}" alt="Frequency Plot">
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="right">
+                <h1>Control de Apuestas</h1>
+                <form method="POST" action="{{ url_for('set_bet_amount') }}">
+                    <input type="text" name="bet_amount" placeholder="Enter bet amount" value="{{ bet_amount }}">
+                    <button type="submit">Set Bet Amount</button>
+                </form>
+                
+                <h2>Betting Summary</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bet</th>
+                            <th>Result</th>
+                            <th>Amount</th>
+                            <th>Net Gain</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bet in bets_data %}
+                            <tr>
+                                <td>{{ bet.Bet }}</td>
+                                <td>{{ bet.Result }}</td>
+                                <td>{{ bet.Amount }}</td>
+                                <td>{{ bet.Net_Gain }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p>Total Bets: {{ total_bets }}</p>
+                <p>Total Winnings: {{ total_winnings }}</p>
+                <p>Total Losses: {{ total_losses }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("number-input").focus();
+    </script>
+</body>
+</html>
